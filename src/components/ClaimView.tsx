@@ -60,7 +60,7 @@ export default function ClaimView({ claim, onClearClaim, showNotification, setVi
   const handleRejectConfirm = async (reason: string) => {
     setShowRejectModal(false);
     try {
-      await apiFetch('/v1/rejection', {
+      await apiFetch('/v1/reject', {
         method: 'POST',
         body: JSON.stringify({ claim_id: claim.claim_id, reason })
       });
@@ -209,11 +209,11 @@ export default function ClaimView({ claim, onClearClaim, showNotification, setVi
         </div>
 
         <div className="space-y-6">
-          {claim.post_content?.note && (
+          {(claim.post_content?.note || claim.note_to_poster || claim.post_content?.note_to_poster) && (
             <div>
               <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Instructions</label>
               <div className="bg-slate-950/50 border border-slate-800 rounded-lg p-4 text-slate-300 text-sm whitespace-pre-wrap">
-                {claim.post_content.note}
+                {claim.post_content?.note || claim.note_to_poster || claim.post_content?.note_to_poster}
               </div>
             </div>
           )}
