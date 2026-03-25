@@ -98,8 +98,8 @@ export default function TaskBoard({ username, onClaimSuccess, showNotification }
           </div>
 
           <div className="mb-5">
-            <h4 className="text-white font-medium mb-1">{camp.post_content.title}</h4>
-            <p className="text-slate-400 text-xs line-clamp-3">{camp.post_content.body}</p>
+            <h4 className="text-white font-medium mb-1">{camp.post_content?.title}</h4>
+            <p className="text-slate-400 text-xs line-clamp-3">{camp.post_content?.body}</p>
           </div>
 
           {camp.subreddits.length === 1 ? (
