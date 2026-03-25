@@ -39,7 +39,16 @@ export default function TaskBoard({ username, onClaimSuccess, showNotification }
         method: 'POST',
         body: JSON.stringify({ campaign_id: campaignId, username, subreddit })
       });
-      onClaimSuccess(res);
+      
+      const campaign = campaigns.find(c => c.id === campaignId);
+      const enrichedClaim = {
+        ...campaign,
+        ...res,
+        post_content: res.post_content || campaign?.post_content,
+        campaign_id: campaignId
+      };
+      
+      onClaimSuccess(enrichedClaim);
     } catch (err: any) {
       if (err.data?.error === 'no_slots_available') {
         showNotification('This slot was just taken. Try another.', 'error');
