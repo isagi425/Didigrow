@@ -22,7 +22,7 @@ export interface Campaign {
   payout: number;
   tier: string;
   interaction_type: string;
-  post_content: {
+  post_content?: {
     title: string;
     body: string;
     note?: string;
