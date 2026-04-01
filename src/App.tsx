@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+  import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
 import UsernameGate from './components/UsernameGate';
 import TaskBoard from './components/TaskBoard';
@@ -17,9 +17,8 @@ export default function App() {
   useEffect(() => {
     document.title = import.meta.env.VITE_OPERATOR_NAME || 'Redwire Operator';
     const storedUser = localStorage.getItem('redwire_username');
-    if (storedUser) {
-      setUsername(storedUser);
-    }
+    if (storedUser) setUsername(storedUser);
+
     const storedClaim = localStorage.getItem('redwire_active_claim');
     if (storedClaim) {
       try {
@@ -30,9 +29,7 @@ export default function App() {
         } else {
           localStorage.removeItem('redwire_active_claim');
         }
-      } catch (e) {
-        // ignore
-      }
+      } catch {}
     }
   }, []);
 
@@ -68,8 +65,15 @@ export default function App() {
 
   if (!username) {
     return (
-      <>
-        <UsernameGate onLogin={handleLogin} showNotification={showNotification} />
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
+        <div className="w-full max-w-sm p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 shadow-xl">
+          <h1 className="text-xl font-bold text-center mb-4">
+            {import.meta.env.VITE_OPERATOR_NAME || 'Redwire Operator'}
+          </h1>
+
+          <UsernameGate onLogin={handleLogin} showNotification={showNotification} />
+        </div>
+
         <AnimatePresence>
           {notification && (
             <Notification
@@ -79,34 +83,61 @@ export default function App() {
             />
           )}
         </AnimatePresence>
-      </>
+      </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-300 font-sans">
-      <header className="bg-slate-950 border-b border-slate-800 sticky top-0 z-30">
+
+      {/* HEADER */}
+      <header className="bg-slate-950/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-          <h1 className="text-lg font-bold text-white">
+          
+          <h1 className="text-lg font-bold text-white tracking-wide">
             {import.meta.env.VITE_OPERATOR_NAME || 'Redwire Operator'}
           </h1>
+
           <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-slate-400">u/{username}</span>
-            <button onClick={handleLogout} className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
-              Not you?
+            <span className="text-sm text-slate-400">u/{username}</span>
+
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1 text-xs rounded-lg bg-white/10 hover:bg-white/20 transition"
+            >
+              Logout
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6">
-        {view === 'board' && <TaskBoard username={username} onClaimSuccess={handleClaimSuccess} showNotification={showNotification} />}
-        {view === 'claim' && activeClaim && <ClaimView claim={activeClaim} onClearClaim={handleClearClaim} showNotification={showNotification} setView={setView} />}
-        {view === 'history' && <HistoryView showNotification={showNotification} />}
-        {view === 'earnings' && <EarningsView username={username} showNotification={showNotification} />}
+      {/* MAIN */}
+      <main className="max-w-4xl mx-auto px-4 py-6 space-y-4">
+
+        <div className="rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-4 shadow-lg">
+          {view === 'board' && (
+            <TaskBoard username={username} onClaimSuccess={handleClaimSuccess} showNotification={showNotification} />
+          )}
+
+          {view === 'claim' && activeClaim && (
+            <ClaimView claim={activeClaim} onClearClaim={handleClearClaim} showNotification={showNotification} setView={setView} />
+          )}
+
+          {view === 'history' && (
+            <HistoryView showNotification={showNotification} />
+          )}
+
+          {view === 'earnings' && (
+            <EarningsView username={username} showNotification={showNotification} />
+          )}
+        </div>
+
       </main>
 
-      <BottomNav currentView={view} setView={setView} hasActiveClaim={!!activeClaim} />
+      {/* NAV */}
+      <div className="bg-slate-950/80 backdrop-blur-md border-t border-slate-800">
+        <BottomNav currentView={view} setView={setView} hasActiveClaim={!!activeClaim} />
+      </div>
 
       <AnimatePresence>
         {notification && (
@@ -119,4 +150,4 @@ export default function App() {
       </AnimatePresence>
     </div>
   );
-}
+}      
