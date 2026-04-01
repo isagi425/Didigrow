@@ -1,3 +1,4 @@
+// SAME IMPORTS (unchanged)
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { apiFetch } from '../api';
@@ -42,11 +43,11 @@ export default function UsernameGate({ onLogin, showNotification }: UsernameGate
       if (err.status === 409 || error.includes('already_registered')) {
         setErrorMsg('This username is registered with another operator.');
       } else if (err.status === 404 || error === 'reddit_account_not_found') {
-        setErrorMsg('Reddit account not found. Please check your spelling.');
+        setErrorMsg('Reddit account not found.');
       } else if (error === 'not_eligible') {
-        setErrorMsg('Account not eligible. Requirements: 100+ Post/Comment Karma & 10+ days old.');
+        setErrorMsg('Account not eligible (karma/age issue).');
       } else {
-        setErrorMsg(error || 'Failed to connect to verification server.');
+        setErrorMsg(error || 'Verification failed.');
       }
     } finally {
       setLoading(false);
@@ -63,18 +64,13 @@ export default function UsernameGate({ onLogin, showNotification }: UsernameGate
       });
 
       if (res.status === 'verified' || res.status === 'already_registered') {
-        showNotification('Account verified! Welcome.', 'success');
+        showNotification('Account verified!', 'success');
         onLogin(username);
       } else {
-        setErrorMsg('Token not found in your bio yet. Make sure you saved your Reddit profile and try again.');
+        setErrorMsg('Token not found in bio yet.');
       }
     } catch (err: any) {
-      const msg = err.data?.message || err.data?.error || '';
-      if (msg === 'not_eligible') {
-        setErrorMsg('Verification failed: Account does not meet karma/age requirements.');
-      } else {
-        setErrorMsg(msg || 'Verification failed. Please ensure the token is in your bio.');
-      }
+      setErrorMsg('Verification failed.');
     } finally {
       setLoading(false);
     }
@@ -88,63 +84,76 @@ export default function UsernameGate({ onLogin, showNotification }: UsernameGate
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#050816] relative overflow-hidden text-white px-4">
+
+      {/* 🔥 BACKGROUND GLOW */}
+      <div className="absolute w-[500px] h-[500px] bg-purple-600 opacity-20 blur-3xl rounded-full top-[-150px] left-[-150px]"></div>
+      <div className="absolute w-[400px] h-[400px] bg-blue-600 opacity-20 blur-3xl rounded-full bottom-[-150px] right-[-150px]"></div>
+
       <motion.div 
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-slate-900/90 backdrop-blur-sm border border-slate-800 rounded-2xl p-6 shadow-xl"
+        className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl"
       >
-        <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          {import.meta.env.VITE_OPERATOR_NAME || 'Redwire Operator'}
+
+        {/* TITLE */}
+        <h1 className="text-3xl font-bold text-center mb-2">
+          ⚡ Nexora
         </h1>
+
+        <p className="text-center text-gray-400 text-sm mb-6">
+          Connect your Reddit account to start earning
+        </p>
 
         {step === 'input' ? (
           <form onSubmit={handleContinue} className="space-y-4">
-            <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
-                Enter your Reddit username
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="e.g. CyberFalcon847"
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
-                required
-              />
-            </div>
+
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter Reddit username"
+              className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 focus:border-purple-500 outline-none text-white placeholder-gray-400"
+              required
+            />
+
             {errorMsg && (
               <div className="text-red-400 text-sm bg-red-900/20 p-3 rounded-lg border border-red-900/30">
                 {errorMsg}
               </div>
             )}
+
             <button
               type="submit"
-              disabled={loading || !username.trim()}
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-indigo-600/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
+              disabled={loading}
+              className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-105 transition transform shadow-lg flex justify-center"
             >
-              {loading ? <div className="animate-spin border-white border-t-transparent rounded-full w-5 h-5 border-2"></div> : 'Continue'}
+              {loading ? (
+                <div className="animate-spin border-white border-t-transparent rounded-full w-5 h-5 border-2"></div>
+              ) : (
+                'Verify & Continue 🚀'
+              )}
             </button>
+
           </form>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-5">
+
             <div>
-              <h2 className="text-lg font-bold text-white mb-2">Your verification token</h2>
-              <div className="flex items-center justify-between bg-slate-800 rounded-lg px-4 py-3 border border-slate-700">
-                <span className="font-mono text-xl text-indigo-400">{token}</span>
-                <button 
-                  onClick={copyToken}
-                  className="text-slate-400 hover:text-white transition-colors p-2"
-                >
-                  {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
+              <p className="text-sm text-gray-400 mb-2">Copy this token</p>
+
+              <div className="flex items-center justify-between bg-white/10 rounded-xl px-4 py-3 border border-white/10">
+                <span className="font-mono text-purple-400">{token}</span>
+
+                <button onClick={copyToken}>
+                  {copied ? <Check className="text-green-400" /> : <Copy />}
                 </button>
               </div>
             </div>
-            
-            <div className="text-sm text-slate-300 space-y-2">
-              <p>Add this token to your Reddit profile's "About" section, then click Verify below.</p>
-              <p className="text-slate-500 text-xs">How to do this: reddit.com/settings &gt; Profile &gt; About &gt; paste token &gt; Save</p>
-            </div>
+
+            <p className="text-xs text-gray-400">
+              Paste this in your Reddit bio → save → then click verify
+            </p>
 
             {errorMsg && (
               <div className="text-red-400 text-sm bg-red-900/20 p-3 rounded-lg border border-red-900/30">
@@ -155,19 +164,21 @@ export default function UsernameGate({ onLogin, showNotification }: UsernameGate
             <button
               onClick={handleVerify}
               disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-indigo-600/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
+              className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-105 transition transform shadow-lg flex justify-center"
             >
-              {loading ? <div className="animate-spin border-white border-t-transparent rounded-full w-5 h-5 border-2"></div> : "I've added it — Verify"}
+              {loading ? "..." : "Verify Now ✅"}
             </button>
-            
+
             <button
               onClick={() => setStep('input')}
-              className="w-full text-slate-500 hover:text-slate-300 text-sm transition-colors"
+              className="w-full text-gray-500 text-sm hover:text-gray-300"
             >
               Back
             </button>
+
           </div>
         )}
+
       </motion.div>
     </div>
   );
